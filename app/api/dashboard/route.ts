@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/src/db/client";
-import { notes, tags, noteTags } from "@/src/db/schema";
+import { notes, tags } from "@/src/db/schema";
 import { eq, desc, count, sql } from "drizzle-orm";
 
 export async function GET(request: NextRequest) {

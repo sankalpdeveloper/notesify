@@ -22,6 +22,7 @@ export async function GET(request: NextRequest) {
     try {
       decoded = jwt.verify(token, JWT_SECRET) as { userId: number; email: string };
     } catch (error) {
+      console.error("Invalid authentication token", error);
       return NextResponse.json(
         { error: "Invalid authentication token" },
         { status: 401 }
@@ -41,6 +42,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!user) {
+      console.error("User not found");
       return NextResponse.json(
         { error: "User not found" },
         { status: 404 }

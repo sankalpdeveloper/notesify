@@ -19,6 +19,7 @@ export async function getAuthUser(request: NextRequest): Promise<AuthUser | null
     const decoded = jwt.verify(token, JWT_SECRET) as AuthUser;
     return decoded;
   } catch (error) {
+    console.error("Invalid authentication token", error);
     return null;
   }
 }
