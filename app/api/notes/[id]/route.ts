@@ -6,10 +6,11 @@ import { eq, and } from "drizzle-orm";
 // GET - Fetch a specific note
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const noteId = parseInt(params.id);
+    const { id } = await params;
+    const noteId = parseInt(id);
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get("userId");
 
@@ -58,10 +59,11 @@ export async function GET(
 // PUT - Update a note
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const noteId = parseInt(params.id);
+    const { id } = await params;
+    const noteId = parseInt(id);
     const body = await request.json();
     const { title, content, userId, tagIds } = body;
 
@@ -138,10 +140,11 @@ export async function PUT(
 // DELETE - Delete a note
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const noteId = parseInt(params.id);
+    const { id } = await params;
+    const noteId = parseInt(id);
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get("userId");
 

@@ -21,14 +21,13 @@ export async function GET(request: NextRequest) {
     const userIdNum = parseInt(userId);
     
     // Build where conditions
-    let whereConditions = eq(notes.userId, userIdNum);
+    const conditions = [eq(notes.userId, userIdNum)];
     
     if (search) {
-      whereConditions = and(
-        whereConditions,
-        ilike(notes.content, `%${search}%`)
-      );
+      conditions.push(ilike(notes.content, `%${search}%`));
     }
+    
+    const whereConditions = conditions.length === 1 ? conditions[0] : and(...conditions);
 
     // Fetch notes with pagination
     const userNotes = await db.query.notes.findMany({
