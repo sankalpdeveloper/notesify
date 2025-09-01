@@ -187,6 +187,15 @@ export default function Notes() {
                   </svg>
                   <span className="hidden sm:inline">Dashboard</span>
                 </Link>
+                <Link
+                  href="/tags"
+                  className="inline-flex items-center px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all duration-200"
+                >
+                  <svg className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                  </svg>
+                  <span className="hidden sm:inline">Tags</span>
+                </Link>
                 <button
                   onClick={() => setShowNewNoteForm(true)}
                   className="inline-flex items-center px-3 sm:px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-xs sm:text-sm font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
@@ -336,7 +345,18 @@ export default function Notes() {
                   Tags
                 </label>
                 {tags.length === 0 ? (
-                  <p className="text-sm text-gray-500 italic">No tags available. Create some tags first!</p>
+                  <div className="text-center py-4 px-6 bg-gray-50/50 rounded-lg border border-gray-200">
+                    <p className="text-sm text-gray-500 mb-3">No tags available yet!</p>
+                    <Link
+                      href="/tags"
+                      className="inline-flex items-center px-3 py-2 text-xs font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-all duration-200"
+                    >
+                      <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      Create your first tag
+                    </Link>
+                  </div>
                 ) : (
                   <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-2">
                     {tags.map((tag) => (

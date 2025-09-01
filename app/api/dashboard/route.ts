@@ -2,33 +2,32 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/src/db/client";
 import { notes, tags } from "@/src/db/schema";
 import { eq, desc, count, sql } from "drizzle-orm";
+import { getAuthUser } from "@/src/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get("userId");
-
-    if (!userId) {
-      return NextResponse.json({ error: "User ID is required" }, { status: 400 });
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userIdNum = parseInt(userId);
+    const userId =authUser.userId;
 
     // Get total notes count
     const totalNotesResult = await db
       .select({ count: count() })
       .from(notes)
-      .where(eq(notes.userId, userIdNum));
+      .where(eq(notes.userId, userId));
 
     // Get total tags count
     const totalTagsResult = await db
       .select({ count: count() })
       .from(tags)
-      .where(eq(tags.userId, userIdNum));
+      .where(eq(tags.userId, userId));
 
     // Get recent notes (last 5)
     const recentNotes = await db.query.notes.findMany({
-      where: eq(notes.userId, userIdNum),
+      where: eq(notes.userId, userId),
       orderBy: [desc(notes.updatedAt)],
       limit: 5,
       with: {
@@ -48,7 +47,7 @@ export async function GET(request: NextRequest) {
       .select({ count: count() })
       .from(notes)
       .where(
-        sql`${notes.userId} = ${userIdNum} AND ${notes.createdAt} >= ${sevenDaysAgo}`
+        sql`${notes.userId} = ${userId} AND ${notes.createdAt} >= ${sevenDaysAgo}`
       );
 
     // Format recent notes
