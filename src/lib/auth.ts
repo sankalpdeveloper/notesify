@@ -12,12 +12,19 @@ export async function getAuthUser(request: NextRequest): Promise<AuthUser | null
   try {
     const token = request.cookies.get("auth-token")?.value;
 
-    if (!token) {
+    if (!token || !JWT_SECRET) {
       return null;
     }
 
-    const decoded = jwt.verify(token, JWT_SECRET) as AuthUser;
-    return decoded;
+    const decoded = jwt.verify(token, JWT_SECRET) as unknown;
+    
+    // Type guard to ensure the decoded token has the required properties
+    if (typeof decoded === 'object' && decoded !== null && 
+        'userId' in decoded && 'email' in decoded) {
+      return decoded as AuthUser;
+    }
+    
+    return null;
   } catch (error) {
     console.error("Invalid authentication token", error);
     return null;

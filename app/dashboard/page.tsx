@@ -48,7 +48,7 @@ export default function Dashboard() {
     
     try {
       setLoading(true);
-      const response = await fetch(`/api/dashboard?userId=${user.id}`);
+      const response = await fetch(`/api/dashboard`);
       
       if (!response.ok) {
         throw new Error("Failed to fetch dashboard data");

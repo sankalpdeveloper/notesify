@@ -54,7 +54,6 @@ export default function Notes() {
     try {
       setLoading(true);
       const params = new URLSearchParams({
-        userId: user.id.toString(),
         ...(searchTerm && { search: searchTerm }),
         ...(selectedTagId && { tagId: selectedTagId.toString() })
       });
@@ -78,7 +77,7 @@ export default function Notes() {
     if (!user) return;
     
     try {
-      const response = await fetch(`/api/tags?userId=${user.id}`);
+      const response = await fetch(`/api/tags`);
       
       if (!response.ok) {
         throw new Error("Failed to fetch tags");
@@ -102,8 +101,7 @@ export default function Notes() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          ...newNote,
-          userId: user?.id
+          ...newNote
         }),
       });
 
@@ -126,7 +124,7 @@ export default function Notes() {
     if (!confirm("Are you sure you want to delete this note?")) return;
 
     try {
-      const response = await fetch(`/api/notes/${noteId}?userId=${user?.id}`, {
+      const response = await fetch(`/api/notes/${noteId}`, {
         method: "DELETE",
       });
 
