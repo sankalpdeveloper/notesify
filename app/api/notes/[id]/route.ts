@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/src/db/client";
 import { notes, noteTags } from "@/src/db/schema";
 import { eq, and } from "drizzle-orm";
+import { getAuthUser } from "@/src/lib/auth";
 
 // GET - Fetch a specific note
 export async function GET(
@@ -11,17 +12,17 @@ export async function GET(
   try {
     const { id } = await params;
     const noteId = parseInt(id);
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get("userId");
-
-    if (!userId) {
-      return NextResponse.json({ error: "User ID is required" }, { status: 400 });
+    
+    // Get user from cookie
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const note = await db.query.notes.findFirst({
       where: and(
         eq(notes.id, noteId),
-        eq(notes.userId, parseInt(userId))
+        eq(notes.userId, authUser.userId)
       ),
       with: {
         noteTags: {
@@ -64,11 +65,18 @@ export async function PUT(
   try {
     const { id } = await params;
     const noteId = parseInt(id);
+    
+    // Get user from cookie
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    
     const body = await request.json();
-    const { title, content, userId, tagIds } = body;
+    const { title, content, tagIds } = body;
 
-    if (!content || !userId) {
-      return NextResponse.json({ error: "Content and user ID are required" }, { status: 400 });
+    if (!content) {
+      return NextResponse.json({ error: "Content is required" }, { status: 400 });
     }
 
     // Update the note
@@ -81,7 +89,7 @@ export async function PUT(
       })
       .where(and(
         eq(notes.id, noteId),
-        eq(notes.userId, parseInt(userId))
+        eq(notes.userId, authUser.userId)
       ))
       .returning();
 
@@ -145,11 +153,11 @@ export async function DELETE(
   try {
     const { id } = await params;
     const noteId = parseInt(id);
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get("userId");
-
-    if (!userId) {
-      return NextResponse.json({ error: "User ID is required" }, { status: 400 });
+    
+    // Get user from cookie
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Delete the note (tags will be deleted due to cascade)
@@ -157,7 +165,7 @@ export async function DELETE(
       .delete(notes)
       .where(and(
         eq(notes.id, noteId),
-        eq(notes.userId, parseInt(userId))
+        eq(notes.userId, authUser.userId)
       ))
       .returning();
 

@@ -2,19 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/src/db/client";
 import { tags } from "@/src/db/schema";
 import { eq, and } from "drizzle-orm";
+import { getAuthUser } from "@/src/lib/auth";
 
 // GET - Fetch all tags for a user
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get("userId");
-
-    if (!userId) {
-      return NextResponse.json({ error: "User ID is required" }, { status: 400 });
+    // Get user from cookie
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const userTags = await db.query.tags.findMany({
-      where: eq(tags.userId, parseInt(userId)),
+      where: eq(tags.userId, authUser.userId),
       orderBy: [tags.name]
     });
 
@@ -28,16 +28,22 @@ export async function GET(request: NextRequest) {
 // POST - Create a new tag
 export async function POST(request: NextRequest) {
   try {
+    // Get user from cookie
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    
     const body = await request.json();
-    const { name, color, userId } = body;
+    const { name, color } = body;
 
-    if (!name || !userId) {
-      return NextResponse.json({ error: "Name and user ID are required" }, { status: 400 });
+    if (!name) {
+      return NextResponse.json({ error: "Name is required" }, { status: 400 });
     }
 
     // Check if tag with same name already exists for this user
     const existingTag = await db.query.tags.findFirst({
-      where: and(eq(tags.name, name), eq(tags.userId, parseInt(userId)))
+      where: and(eq(tags.name, name), eq(tags.userId, authUser.userId))
     });
 
     if (existingTag) {
@@ -47,7 +53,7 @@ export async function POST(request: NextRequest) {
     const newTag = await db.insert(tags).values({
       name,
       color: color || null,
-      userId: parseInt(userId)
+      userId: authUser.userId
     }).returning();
 
     return NextResponse.json(newTag[0], { status: 201 });

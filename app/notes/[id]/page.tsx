@@ -40,9 +40,6 @@ export default function NoteEditPage({ params }: NoteEditPageProps) {
     tagIds: [] as number[]
   });
 
-  // TODO: Replace with actual user authentication
-  const userId = 1;
-
   useEffect(() => {
     fetchNote();
     fetchTags();
@@ -51,7 +48,7 @@ export default function NoteEditPage({ params }: NoteEditPageProps) {
   const fetchNote = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/notes/${noteId}?userId=${userId}`);
+      const response = await fetch(`/api/notes/${noteId}`);
       
       if (!response.ok) {
         if (response.status === 404) {
@@ -78,7 +75,7 @@ export default function NoteEditPage({ params }: NoteEditPageProps) {
 
   const fetchTags = async () => {
     try {
-      const response = await fetch(`/api/tags?userId=${userId}`);
+      const response = await fetch(`/api/tags`);
       
       if (!response.ok) {
         throw new Error("Failed to fetch tags");
@@ -102,8 +99,7 @@ export default function NoteEditPage({ params }: NoteEditPageProps) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          ...editedNote,
-          userId
+          ...editedNote
         }),
       });
 
@@ -125,7 +121,7 @@ export default function NoteEditPage({ params }: NoteEditPageProps) {
     if (!confirm("Are you sure you want to delete this note?")) return;
 
     try {
-      const response = await fetch(`/api/notes/${noteId}?userId=${userId}`, {
+      const response = await fetch(`/api/notes/${noteId}`, {
         method: "DELETE",
       });
 
@@ -151,10 +147,26 @@ export default function NoteEditPage({ params }: NoteEditPageProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading note...</p>
+          <div className="relative">
+            {/* Outer ring */}
+            <div className="w-20 h-20 border-4 border-gray-200 rounded-full animate-spin border-t-blue-600"></div>
+            {/* Inner ring */}
+            <div className="absolute top-2 left-2 w-16 h-16 border-4 border-transparent rounded-full animate-spin border-t-blue-400" style={{ animationDirection: 'reverse', animationDuration: '0.8s' }}></div>
+            {/* Center dot */}
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-blue-600 rounded-full animate-pulse"></div>
+          </div>
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Loading Note</h3>
+            <p className="text-gray-600">Please wait while we fetch your note...</p>
+          </div>
+          {/* Progress dots */}
+          <div className="flex justify-center space-x-1 mt-4">
+            <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+            <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+            <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+          </div>
         </div>
       </div>
     );
@@ -260,7 +272,7 @@ export default function NoteEditPage({ params }: NoteEditPageProps) {
                 placeholder="Enter note title (optional)"
                 value={editedNote.title}
                 onChange={(e) => setEditedNote({ ...editedNote, title: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg text-gray-900"
               />
             </div>
 
@@ -274,7 +286,7 @@ export default function NoteEditPage({ params }: NoteEditPageProps) {
                 placeholder="Enter note content..."
                 value={editedNote.content}
                 onChange={(e) => setEditedNote({ ...editedNote, content: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-gray-900"
                 required
               />
             </div>
